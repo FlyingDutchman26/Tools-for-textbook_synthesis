@@ -19,7 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # parser.add_argument("--api_key",type=str, required=True, help="Your OpenAI API key")
     parser.add_argument("--max_tokens", type=int, default=2048, help="Max tokens for generated output")
-    parser.add_argument('--gen_nums',type=int, default=1000)
+    parser.add_argument('--gen_nums',type=int, default=10000)
     parser.add_argument('--output_dir',type=str,default='./textbook')
     parser.add_argument("--threads_num_per_key", type=int, default=200)
     return parser.parse_args()
@@ -39,7 +39,9 @@ def save_response_to_file(worker_id, response, output_dir):
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(dialogue_data, f, ensure_ascii=False, indent=4)
         
-def generate_textbooks(worker_id, args, api_keys):
+def generate_textbooks(worker_id, args):
+    with open('extracted_keys.txt','r') as f:
+        api_keys = [key.strip() for key in f.readlines()]
     llm = OpenaiAPIWrapper()
     current_key = api_keys[int(worker_id%4)]
     llm.set_api_key(current_key) # 200个线程，每50个线程用一个key
@@ -86,11 +88,9 @@ def generate_textbooks(worker_id, args, api_keys):
 
 def main(args):
     start_time = time.time()
-    with open('extracted_keys.txt','r') as f:
-        api_keys = [key.strip() for key in f.readlines()]
     threads = []
     for j in range(args.threads_num_per_key):
-        t = Thread(target=generate_textbooks, args=(j, args, api_keys))
+        t = Thread(target=generate_textbooks, args=(j, args))
         t.start()
         print(str(j)+"starts!")
         threads.append(t)
