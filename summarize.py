@@ -26,6 +26,6 @@ def num_tokens_from_string(string: str, encoding_name: str) -> int:
 #             # 使用tokenizer计算token数量
 #             tokens = num_tokens_from_string(response,'gpt2')
 #             total_tokens += tokens
-
+# print(f"Total tokens in the folder: {total_tokens}")
 print(f'Total response:{len(os.listdir(folder_path))}')
-print(f"Total tokens in the folder: {total_tokens}")
+

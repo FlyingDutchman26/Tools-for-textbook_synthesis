@@ -10,18 +10,21 @@ from threading import Thread
 import datasets
 
 import openai
-from code_synthesis_textbooks import *
+from code_synthesis_exercises import synthesize_exercises
 from openai_api_wrapper import OpenaiAPIWrapper
 
-topics = generate_topics()
+with open('words.txt','r') as f:
+    words_set = f.readlines()
+    
+words_set = [word.strip() for word in words_set]
 
 def parse_args():
     parser = argparse.ArgumentParser()
     # parser.add_argument("--api_key",type=str, required=True, help="Your OpenAI API key")
-    parser.add_argument("--max_tokens", type=int, default=2048, help="Max tokens for generated output")
-    parser.add_argument('--gen_nums',type=int, default=10000)
-    parser.add_argument('--output_dir',type=str,default='./textbook')
-    parser.add_argument("--threads_num_per_key", type=int, default=200)
+    parser.add_argument("--max_tokens", type=int, default=1024, help="Max tokens for generated output")
+    parser.add_argument('--gen_nums',type=int, default=2000)
+    parser.add_argument('--output_dir',type=str,default='./exercise')
+    parser.add_argument("--threads_num_per_key", type=int, default=160)
     return parser.parse_args()
 
 def save_response_to_file(worker_id, response, output_dir):
@@ -30,8 +33,6 @@ def save_response_to_file(worker_id, response, output_dir):
     filename = f'response_{timestamp}_worker{worker_id}.json'
 
     dialogue_data = {
-        "timestamp": timestamp,
-        "worker":worker_id,
         "response": response
     }
 
@@ -45,7 +46,7 @@ def generate_textbooks(worker_id, args,api_keys):
     llm.set_api_key(current_key) # 200个线程，每50个线程用一个key
     start_time = time.time()
     system_prompt = '''You are a helpful assistant. '''
-    user_prompt = synthesize_textbook(topics,num_topics=6)
+    user_prompt = synthesize_exercises(words_set,num_words = 5)
     messages = [{"role": "system", "content": system_prompt}]
     messages.append({"role": "user", "content": user_prompt})
     generated_num = 0
@@ -90,7 +91,7 @@ def main(args):
     with open('extracted_keys.txt','r') as f:
         api_keys = [key.strip() for key in f.readlines()]
     for j in range(args.threads_num_per_key):
-        t = Thread(target=generate_textbooks, args=(j, args, api_keys))
+        t = Thread(target=generate_textbooks, args=(j, args,api_keys))
         t.start()
         print(str(j)+"starts!")
         threads.append(t)
