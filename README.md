@@ -2,7 +2,7 @@
 # Tools for Code Synthesis using gpt-3.5-turbo
 Fudan NLP
 
-* Prepare an api lists for utilizing gpt-3.5-turbo(chatgpt)
+* Prepare an api list for utilizing gpt-3.5-turbo(chatgpt)
 * Use the scripts in this repo to generalize high-quality code datasets, which is a reproduction of **Textboos Are All You Need**
 
 ## code_synthesis_textbooks
